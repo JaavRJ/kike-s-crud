@@ -38,6 +38,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (cadenita.equals("Altas")) {
             Intent intent = new Intent(this, Altas.class);
             startActivity(intent);
+        }else if (cadenita.equals("Bajas")) {
+            Intent intent = new Intent(this, Bajas.class);
+            startActivity(intent);
+        }else if (cadenita.equals("Consultas")) {
+            Intent intent = new Intent(this, Consultas.class);
+            startActivity(intent);
         }
     }
 }

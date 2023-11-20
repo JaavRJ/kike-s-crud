@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Altas">
+
+    <AutoCompleteTextView
+        android:id="@+id/autoc"
+        android:layout_width="285dp"
+        android:layout_height="wrap_content"
+        android:layout_x="59dp"
+        android:layout_y="149dp" />
+
+    <EditText
+        android:id="@+id/codi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="103dp"
+        android:layout_y="85dp"
+        android:ems="10"
+        android:inputType="number"
+        android:hint="Codigo"
+        android:enabled="false"/>
+
+    <Spinner
+        android:id="@+id/artista"
+        android:layout_width="282dp"
+        android:layout_height="39dp"
+        android:layout_x="56dp"
+        android:layout_y="220dp"
+        android:enabled="false"/>
+
+    <Spinner
+        android:id="@+id/album"
+        android:layout_width="285dp"
+        android:layout_height="39dp"
+        android:layout_x="61dp"
+        android:layout_y="273dp"
+        android:enabled="false"/>
+
+    <RadioGroup
+        android:id="@+id/tegusto"
+        android:layout_width="294dp"
+        android:layout_height="wrap_content"
+        android:layout_x="68dp"
+        android:layout_y="415dp"
+        android:orientation="horizontal"
+        android:enabled="false">
+
+        <RadioButton
+            android:id="@+id/si"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_x="77dp"
+            android:layout_y="497dp"
+            android:text="si" />
+
+        <RadioButton
+            android:id="@+id/no"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_x="222dp"
+            android:layout_y="497dp"
+            android:text="no" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="69dp"
+        android:layout_height="wrap_content"
+        android:layout_x="177dp"
+        android:layout_y="391dp"
+        android:text="Te gusta?:" />
+
+    <EditText
+        android:id="@+id/cali"
+        android:layout_width="282dp"
+        android:layout_height="wrap_content"
+        android:layout_x="71dp"
+        android:layout_y="508dp"
+        android:hint="Calificacion"
+        android:enabled="false"/>
+
+    <Button
+        android:id="@+id/buscar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="111dp"
+        android:layout_y="582dp"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:text="Buscar" />
+
+    <Button
+        android:id="@+id/regresar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="219dp"
+        android:layout_y="580dp"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:text="Regresar" />
+
+</AbsoluteLayout>
