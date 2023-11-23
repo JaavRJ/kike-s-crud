@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bconsultas.setOnClickListener(this);
 
 
+
     }
 
     @Override
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         }else if (cadenita.equals("Consultas")) {
             Intent intent = new Intent(this, Consultas.class);
+            startActivity(intent);
+        }else if (cadenita.equals("Cambios")) {
+            Intent intent = new Intent(this, Cambios.class);
             startActivity(intent);
         }
     }

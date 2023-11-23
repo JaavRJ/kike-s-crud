@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -12,27 +13,25 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-
-import com.example.crudjaviercin.R;
-
 import java.util.ArrayList;
 
-public class Altas extends AppCompatActivity implements View.OnClickListener {
+public class Cambios extends AppCompatActivity implements View.OnClickListener {
 
     EditText codig, desc, cali;
     Spinner artis, album;
     RadioButton rsi, rno;
-    Button bAlta, bReg;
+    Button bBusca, bReg;
     String guta;
     RadioGroup teguta;
     AutoCompleteTextView acvistita;
-    ArrayAdapter<String> topCancionesAD, vacioAD;
+    ArrayAdapter<String> lasBuscadas, vacioAD;
+    ArrayList<String> cancionesBase;
+    Cursor cursor = null;
     String[] topCanciones = {"Addict with a Pen",
             "Air Catcher",
             "A Car, a Torch, a Death",
@@ -170,25 +169,16 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
             "Brooklyn Baby", "West Coast", "Sad Girl", "Pretty When You Cry", "Money Power Glory",
             "Fucked My Way Up to the Top", "Old Money", "The Other Woman"
     };
-    String horariosele;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_altas);
-
-        vacioAD = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
-        topCancionesAD = new ArrayAdapter<>(this, android.R.layout.select_dialog_item, topCanciones);
-
-
-
-        acvistita = findViewById(R.id.autoc);
-        acvistita.setAdapter(vacioAD);
+        setContentView(R.layout.activity_cambios);
 
         artis = findViewById(R.id.artista);
         album = findViewById(R.id.album);
-        bAlta = findViewById(R.id.alta);
-        bAlta.setOnClickListener(this);
+        bBusca = findViewById(R.id.buscar);
+        bBusca.setOnClickListener(this);
         bReg = findViewById(R.id.regresar);
         bReg.setOnClickListener(this);
         codig = findViewById(R.id.codi);
@@ -197,6 +187,124 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
         rno = findViewById(R.id.no);
         teguta = findViewById(R.id.tegusto);
 
+        acvistita = findViewById(R.id.autoc);
+        Base admin = new Base(this, "mispoti", null, 1);
+        SQLiteDatabase basesilla = admin.getWritableDatabase();
+        String query = "SELECT descripcion FROM canciones";
+        cursor = basesilla.rawQuery(query, null);
+
+        // Inicializa cancionesBase antes de agregar elementos
+        cancionesBase = new ArrayList<>();
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                cancionesBase.add(cursor.getString(0));
+            }
+            cursor.close(); // Recuerda cerrar el cursor cuando hayas terminado de usarlo
+        }
+
+        vacioAD = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        lasBuscadas = new ArrayAdapter<>(this, android.R.layout.select_dialog_item, cancionesBase);
+
+        acvistita.setAdapter(lasBuscadas);
+    }
+
+    @Override
+    public void onClick(View view) {
+        String cadena = ((Button) view).getText().toString();
+
+        if (cadena.equals("Regresar")) {
+            Intent intentito = new Intent(this, MainActivity.class);
+            startActivity(intentito);
+        } else if (cadena.equals("Buscar")) {
+            Base admin = new Base(this, "mispoti", null, 1);
+            SQLiteDatabase baseisilla = admin.getWritableDatabase();
+            String cod = acvistita.getText().toString();
+            String[] projection = {"codigo", "descripcion", "artista", "album", "teguta", "cali"};
+            String selection = "descripcion = ?";
+            String[] selectionArgs = {cod};
+            Cursor cursor1 = baseisilla.query("canciones", // Nombre de la tabla
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null,
+                    null,
+                    null);
+
+
+            if (cursor1 != null && cursor1.moveToFirst()) {
+                int resultCodi = cursor1.getInt(cursor1.getColumnIndexOrThrow("codigo"));
+                String resultDesc = cursor1.getString(cursor1.getColumnIndexOrThrow("descripcion"));
+                int resultCali = cursor1.getInt(cursor1.getColumnIndexOrThrow("cali"));
+                String resultTeguta = cursor1.getString(cursor1.getColumnIndexOrThrow("teguta"));
+                String resultArtis = cursor1.getString(cursor1.getColumnIndexOrThrow("artista"));
+                String resultAlbum = cursor1.getString(cursor1.getColumnIndexOrThrow("album"));
+                codig.setText(String.valueOf(resultCodi));
+                cali.setText(String.valueOf(resultCali));
+                ArrayList<String> resultsA = new ArrayList<>();
+                resultsA.add(resultArtis);
+                ArrayAdapter<String> resulA = new ArrayAdapter<>(this, android.R.layout.select_dialog_item, resultsA);
+                artis.setAdapter(resulA);
+                artis.setEnabled(false);
+
+                ArrayList<String> resultsAl = new ArrayList<>();
+                resultsAl.add(resultAlbum);
+                ArrayAdapter<String> resulAl = new ArrayAdapter<>(this, android.R.layout.select_dialog_item, resultsAl);
+                album.setAdapter(resulAl);
+                album.setEnabled(false);
+
+                Toast.makeText(this, "encontrado", Toast.LENGTH_SHORT).show();
+                baseisilla.close();
+                cursor1.close();
+                habilitar();
+                bBusca.setText("Cambiar");
+            } else {
+                Toast.makeText(this, "no existe", Toast.LENGTH_SHORT).show();
+                baseisilla.close();
+            }
+        } else if (cadena.equals("Cambiar")) {
+            Base admin = new Base( this,  "mispoti",  null,  1);
+            SQLiteDatabase baseisilla = admin.getWritableDatabase();
+            String cod = codig.getText().toString();
+            String des = acvistita.getText().toString();
+            String arti = artis.getSelectedItem().toString();
+            String alb = album.getSelectedItem().toString();
+            String gu = guta;
+            String cal = cali.getText().toString();
+
+            ContentValues registro = new ContentValues();
+            registro.put("descripcion", des);
+            registro.put("artista", arti);
+            registro.put("codigo", cod);
+            registro.put("album", alb);
+            registro.put("teguta", gu);
+            registro.put("cali", cal);
+            String selection = "codigo = ?";
+            String[] selectionArgs = { cod };
+
+            int rowsUpdated = baseisilla.update(  "canciones", registro, selection, selectionArgs);
+                    Toast.makeText( this,  "cambiado", Toast.LENGTH_SHORT).show();
+            tododenew();
+            baseisilla.close();
+        }
+    }
+
+    public void tododenew(){
+        acvistita.setEnabled(true);
+        album.setVisibility(View.INVISIBLE);
+        artis.setEnabled(false);
+        album.setAdapter(null);
+        codig.setText("");
+        cali.setText("");
+        cali.setEnabled(false);
+        acvistita.setFocusable(true);
+    }
+
+    public void habilitar(){
+        codig.setEnabled(true);
+        artis.setEnabled(true);
+        album.setEnabled(true);
+        cali.setEnabled(true);
         ArrayList<String> artistas = new ArrayList<>();
         artistas.add("Artistas:");
         artistas.add("Twenty One Pilots");
@@ -208,24 +316,6 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, artistas);
         adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         artis.setAdapter(adapter);
-
-        album.setVisibility(View.INVISIBLE);
-        configListener();
-
-        teguta.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton boton = findViewById(checkedId);
-
-                if (boton != null) {
-                    guta = boton.getText().toString();
-                }
-            }
-        });
-
-
-        album.setVisibility(View.INVISIBLE);
-
         configListener();
     }
 
@@ -251,7 +341,6 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
         });
     }
 
-
     private void Act2doSpinner(int posicion) {
         ArrayList<String> albums = new ArrayList<>();
         if (posicion == 1) {
@@ -261,6 +350,7 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
             albums.add("Blurryface");
             albums.add("Trench");
             albums.add("Scaled and Icy");
+            ArrayAdapter<String>topCancionesAD = new ArrayAdapter<>(this, android.R.layout.select_dialog_item, topCanciones);
             acvistita.setThreshold(1);
             acvistita.setAdapter(topCancionesAD);
         } else if (posicion == 2) {
@@ -304,51 +394,12 @@ public class Altas extends AppCompatActivity implements View.OnClickListener {
             acvistita.setAdapter(lanaCancionesAD);
 
         }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, albums);
         adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
         album.setAdapter(adapter);
 
     }
-
-    @Override
-    public void onClick(View v) {
-        String cadenita = ((Button) v).getText().toString();
-        if (cadenita.equals("Regresar")) {
-            Intent intentito = new Intent(this, MainActivity.class);
-            startActivity(intentito);
-        } else if (cadenita.equals("Alta")) {
-            Base admin = new Base(this, "mispoti", null, 1);
-            SQLiteDatabase basededatos = admin.getWritableDatabase();
-            String cod = codig.getText().toString();
-            String des = acvistita.getText().toString();
-            String arti = artis.getSelectedItem().toString();
-            String alb = album.getSelectedItem().toString();
-            String gu = guta;
-            String cal = cali.getText().toString();
-
-
-            ContentValues registro = new ContentValues();
-            registro.put("codigo", cod);
-            registro.put("descripcion", des);
-            registro.put("artista", arti);
-            registro.put("album", alb);
-            registro.put("teguta", gu);
-            registro.put("cali", cal);
-            basededatos.insert("canciones", null, registro);
-            basededatos.close();
-            Toast.makeText(this, "agregado", Toast.LENGTH_SHORT).show();
-            limpiaAlta();
-        }
-    }
-
-public void limpiaAlta(){
-        acvistita.setEnabled(false);
-        album.setVisibility(View.INVISIBLE);
-        album.setAdapter(null);
-        codig.setText("");
-        cali.setText("");
-}
-
 }
 
 
